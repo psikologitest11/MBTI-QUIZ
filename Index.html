@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBTI Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f2f6ff;
+    }
+    .card {
+      border-radius: 15px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <!-- PAGE 1: Login -->
+    <div id="page1">
+      <div class="card mx-auto p-4 shadow-lg" style="max-width: 400px;">
+        <h3 class="text-center mb-4">Selamat Datang di Tes MBTI</h3>
+        <form onsubmit="startQuiz(event)">
+          <div class="mb-3">
+            <label for="username" class="form-label">Masukkan Nama Anda</label>
+            <input type="text" class="form-control" id="username" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Mulai Tes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PAGE 2: Quiz -->
+    <div id="page2" class="hidden">
+      <div class="card p-4 shadow-lg">
+        <h4 class="mb-4">Tes MBTI</h4>
+        <form id="quizForm">
+          <div id="quizContainer"></div>
+          <button type="submit" class="btn btn-success mt-3">Selesai & Lihat Hasil</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PAGE 3: Result -->
+    <div id="page3" class="hidden">
+      <div class="card p-4 shadow-lg">
+        <h4 class="mb-3">Hasil Tes MBTI</h4>
+        <p id="resultText"></p>
+        <button class="btn btn-danger" onclick="location.reload()">Keluar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {q:"Di pesta, Anda lebih suka:",type:"EI",options:["Langsung menyapa","Bicara seperlunya","Mengamati dulu","Mendekati satu dua orang","Menghindar"],map:["E","E","I","I","I"]},
+      {q:"Anda lebih nyaman bekerja:",type:"EI",options:["Dengan tim","Diskusi kelompok","Sendiri di ruang tenang","Remote dari rumah","Sambil mendengarkan musik sendiri"],map:["E","E","I","I","I"]},
+      {q:"Saat bertemu orang baru:",type:"EI",options:["Langsung kenalan","Mulai bicara duluan","Menunggu didekati","Hanya senyum","Berharap tak diajak ngobrol"],map:["E","E","I","I","I"]},
+      {q:"Di acara ramai, Anda:",type:"EI",options:["Energi naik","Suka berdiskusi","Mencari sudut sepi","Cepat lelah","Ingin segera pulang"],map:["E","E","I","I","I"]},
+      {q:"Saat istirahat, Anda lebih suka:",type:"EI",options:["Ngobrol bareng teman","Ikut komunitas","Sendiri dengan buku","Main HP sendiri","Diam di kamar"],map:["E","E","I","I","I"]},
+      {q:"Anda menyukai informasi yang:",type:"SN",options:["Fakta","Data statistik","Fiksi imajinatif","Ide abstrak","Hipotesis"],map:["S","S","N","N","N"]},
+      {q:"Saat belajar sesuatu, Anda:",type:"SN",options:["Langsung praktik","Ikuti langkahnya","Pahami konsep dulu","Analogi & imajinasi","Eksperimen bebas"],map:["S","S","N","N","N"]},
+      {q:"Saat menjelaskan ide, Anda:",type:"SN",options:["Langsung contoh nyata","Data mendukung","Analogi bebas","Ceritakan konsep","Gambaran besar"],map:["S","S","N","N","N"]},
+      {q:"Ketika menghadapi masalah:",type:"SN",options:["Cari fakta","Langkah sistematis","Pikirkan makna","Tanyakan kemungkinan","Bayangkan skenario"],map:["S","S","N","N","N"]},
+      {q:"Saat membaca buku, Anda suka:",type:"SN",options:["Biografi nyata","Data dan statistik","Fiksi dan fantasi","Teori psikologi","Misteri imajinatif"],map:["S","S","N","N","N"]},
+      {q:"Saat membuat keputusan:",type:"TF",options:["Analisis logis","Data kuat","Berdasarkan empati","Pertimbangan perasaan","Menghindari menyakiti"],map:["T","T","F","F","F"]},
+      {q:"Dalam diskusi, Anda cenderung:",type:"TF",options:["Fokus pada ide logis","Tegas & objektif","Peduli perasaan orang","Tidak ingin menyakiti","Menghindari konflik"],map:["T","T","F","F","F"]},
+      {q:"Anda lebih suka dipandang sebagai:",type:"TF",options:["Pintar","Tegas","Ramah","Penyayang","Empatik"],map:["T","T","F","F","F"]},
+      {q:"Saat memberi saran:",type:"TF",options:["Jujur meski menyakitkan","Fokus ke solusi","Berusaha menenangkan","Menghibur","Memberi harapan"],map:["T","T","F","F","F"]},
+      {q:"Saat ada konflik:",type:"TF",options:["Menyelesaikan secara logis","Tanyakan sebab akibat","Mencari jalan damai","Menghindari konfrontasi","Mendukung yang lemah"],map:["T","T","F","F","F"]},
+      {q:"Anda menyusun jadwal harian dengan:",type:"JP",options:["Terencana jelas","Rencana tetap","Fleksibel","Lihat situasi","Tidak suka jadwal"],map:["J","J","P","P","P"]},
+      {q:"Dalam bekerja, Anda:",type:"JP",options:["Deadline awal","Segera dikerjakan","Suka mepet deadline","Nunggu mood","Sambil jalan saja"],map:["J","J","P","P","P"]},
+      {q:"Anda menyukai rencana yang:",type:"JP",options:["Terperinci","Ada to-do list","Bisa berubah","Longgar","Impulsif"],map:["J","J","P","P","P"]},
+      {q:"Dalam liburan, Anda:",type:"JP",options:["Buat itinerary detail","Siapkan dari jauh hari","Spontan","Lihat nanti saja","Tanpa rencana"],map:["J","J","P","P","P"]},
+      {q:"Anda merasa nyaman saat:",type:"JP",options:["Semua rapi","Tugas terselesaikan","Santai tanpa tekanan","Ikut arus","Banyak pilihan terbuka"],map:["J","J","P","P","P"]}
+    ];
+
+    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+    function startQuiz(event) {
+      event.preventDefault();
+      document.getElementById("page1").classList.add("hidden");
+      document.getElementById("page2").classList.remove("hidden");
+      renderQuestions();
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById("quizContainer");
+      questions.forEach((q, index) => {
+        const qBlock = document.createElement("div");
+        qBlock.className = "mb-3";
+        qBlock.innerHTML = `<label class="form-label">${index + 1}. ${q.q}</label>`;
+        q.options.forEach((opt, i) => {
+          qBlock.innerHTML += `
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q${index}" id="q${index}_${i}" value="${q.map[i]}" required>
+              <label class="form-check-label" for="q${index}_${i}">${opt}</label>
+            </div>
+          `;
+        });
+        container.appendChild(qBlock);
+      });
+    }
+
+    document.getElementById("quizForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      formData.forEach((val) => {
+        scores[val]++;
+      });
+      const result =
+        (scores.E >= scores.I ? "E" : "I") +
+        (scores.S >= scores.N ? "S" : "N") +
+        (scores.T >= scores.F ? "T" : "F") +
+        (scores.J >= scores.P ? "J" : "P");
+
+      document.getElementById("page2").classList.add("hidden");
+      document.getElementById("page3").classList.remove("hidden");
+      document.getElementById("resultText").textContent = `Hai, ${document.getElementById("username").value}! Tipe kepribadianmu adalah: ${result}`;
+    });
+  </script>
+</body>
+</html>
