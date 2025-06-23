@@ -1,232 +1,176 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tes MBTI Restoran</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <title>Kuis MBTI - 60 Soal</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .question { margin-bottom: 15px; }
+    .progress-bar { height: 20px; background: #ddd; margin-bottom: 20px; border-radius: 10px; overflow: hidden; }
+    .progress { height: 100%; width: 0%; background: #4caf50; transition: width 0.3s; }
+    .btn { padding: 10px 20px; margin: 10px 5px; background-color: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  </style>
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <form id="quizForm" action="https://formspree.io/f/mjkraore" method="POST">
-      <!-- GANTI your-form-id DENGAN ID FORMSPREE MILIKMU -->
+<body>
 
-      <!-- PAGE 1: Nama -->
-      <div id="page1">
-        <div class="card p-4 shadow-lg">
-          <h4 class="mb-3">Tes Kepribadian MBTI - Dunia Restoran</h4>
-          <div class="mb-3">
-            <label for="username" class="form-label">Masukkan Nama Anda:</label>
-            <input type="text" class="form-control" id="username" name="Nama" required>
-          </div>
-          <button type="button" class="btn btn-primary" onclick="nextPage()">Mulai Tes</button>
-        </div>
-      </div>
+  <h2>Kuis MBTI - 60 Soal</h2>
+  <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
-      <!-- PAGE 2: Soal -->
-      <div id="page2" class="d-none">
-        <div class="card p-4 shadow-lg">
-          <h5 class="mb-3">Pilih jawaban yang paling menggambarkan Anda:</h5>
-          <div id="questions"></div>
-          <button type="submit" class="btn btn-success mt-3">Selesai & Kirim</button>
-        </div>
-      </div>
+  <form id="mbtiForm" action="https://formspree.io/f/mjkraore" method="POST">
+    <div id="questionContainer"></div>
 
-      <!-- Hidden fields for submission -->
-      <input type="hidden" name="MBTI" id="hiddenMBTI">
-      <input type="hidden" name="Deskripsi" id="hiddenDesc">
-      <input type="hidden" name="Rekomendasi Pekerjaan" id="hiddenJobs">
-      <input type="hidden" name="Nama" id="hiddenName">
-    </form>
-  </div>
+    <input type="hidden" name="hasil_mbti" id="hasilMbti">
+    <input type="hidden" name="posisi_cocok" id="posisiCocok">
 
-  <script>
-    const questionsData = [
-      { q: "Kamu lebih suka berada di tengah keramaian atau menyendiri?", options: ["Di keramaian", "Sendiri"], map: ["E", "I"] },
-    { q: "Apakah kamu membuat keputusan berdasarkan logika atau perasaan?", options: ["Logika", "Perasaan"], map: ["T", "F"] },
-    { q: "Kamu lebih suka rencana yang terstruktur atau spontanitas?", options: ["Terstruktur", "Spontan"], map: ["J", "P"] },
-    { q: "Apakah kamu fokus pada detail atau gambaran besar?", options: ["Detail", "Gambaran besar"], map: ["S", "N"] },
-    { q: "Apakah kamu merasa energik setelah bersosialisasi atau lebih lelah?", options: ["Energik", "Lelah"], map: ["E", "I"] },
-    { q: "Apakah kamu lebih percaya fakta atau intuisi?", options: ["Fakta", "Intuisi"], map: ["S", "N"] },
-    { q: "Dalam konflik, kamu lebih suka menghindar atau menyelesaikan langsung?", options: ["Langsung", "Menghindar"], map: ["T", "F"] },
-    { q: "Kamu lebih suka keputusan cepat atau mempertimbangkan matang-matang?", options: ["Cepat", "Matang"], map: ["P", "J"] },
-    { q: "Kamu lebih nyaman dengan rutinitas atau kebebasan?", options: ["Rutinitas", "Kebebasan"], map: ["J", "P"] },
-    { q: "Saat ngobrol, kamu lebih sering memulai atau menunggu diajak?", options: ["Memulai", "Menunggu"], map: ["E", "I"] },
-    // Soal 11-50
-  { q: "Apakah kamu cenderung berbicara banyak atau mendengarkan?", options: ["Berbicara", "Mendengarkan"], map: ["E", "I"] },
-  { q: "Apakah kamu lebih suka teori atau praktik?", options: ["Teori", "Praktik"], map: ["N", "S"] },
-  { q: "Kamu lebih memercayai fakta atau intuisi saat membuat keputusan?", options: ["Fakta", "Intuisi"], map: ["S", "N"] },
-  { q: "Kamu lebih suka berpikir rasional atau mengutamakan perasaan orang lain?", options: ["Rasional", "Perasaan"], map: ["T", "F"] },
-  { q: "Dalam menghadapi tugas, kamu menyusun jadwal atau mengerjakan saat mendekati tenggat?", options: ["Menyusun jadwal", "Dekat tenggat"], map: ["J", "P"] },
-  { q: "Kamu lebih menikmati percakapan mendalam atau basa-basi ringan?", options: ["Percakapan mendalam", "Basa-basi"], map: ["I", "E"] },
-  { q: "Saat mengalami masalah, kamu cenderung mencari solusi sendiri atau bertanya ke orang lain?", options: ["Sendiri", "Bertanya"], map: ["I", "E"] },
-  { q: "Kamu lebih mudah memahami konsep abstrak atau hal konkret?", options: ["Abstrak", "Konkret"], map: ["N", "S"] },
-  { q: "Apa yang lebih penting dalam diskusi: kejujuran atau empati?", options: ["Kejujuran", "Empati"], map: ["T", "F"] },
-  { q: "Apakah kamu merasa nyaman dengan perubahan atau lebih suka stabilitas?", options: ["Perubahan", "Stabilitas"], map: ["P", "J"] },
-  { q: "Kamu mendapatkan energi dari interaksi sosial atau waktu sendiri?", options: ["Interaksi", "Waktu sendiri"], map: ["E", "I"] },
-  { q: "Kamu lebih cenderung mempercayai pengalaman atau kemungkinan?", options: ["Pengalaman", "Kemungkinan"], map: ["S", "N"] },
-  { q: "Saat menilai sesuatu, kamu lebih mempertimbangkan prinsip atau perasaan orang lain?", options: ["Prinsip", "Perasaan"], map: ["T", "F"] },
-  { q: "Dalam keseharian, kamu lebih suka rencana tetap atau fleksibel?", options: ["Rencana tetap", "Fleksibel"], map: ["J", "P"] },
-  { q: "Kamu lebih banyak berbicara atau berpikir dalam hati?", options: ["Berbicara", "Berpikir dalam hati"], map: ["E", "I"] },
-  { q: "Kamu lebih suka ide-ide kreatif atau metode yang telah terbukti?", options: ["Ide kreatif", "Metode terbukti"], map: ["N", "S"] },
-  { q: "Kamu lebih nyaman mengatakan kebenaran langsung atau membungkus dengan perasaan?", options: ["Langsung", "Membungkus"], map: ["T", "F"] },
-  { q: "Kamu lebih produktif dengan jadwal atau spontanitas?", options: ["Jadwal", "Spontanitas"], map: ["J", "P"] },
-  { q: "Apakah kamu lebih suka berada di pusat perhatian atau mengamati?", options: ["Pusat perhatian", "Mengamati"], map: ["E", "I"] },
-  { q: "Apakah kamu lebih tertarik pada masa kini atau masa depan?", options: ["Masa kini", "Masa depan"], map: ["S", "N"] },
-  { q: "Dalam perselisihan, kamu mencari keadilan atau menjaga hubungan?", options: ["Keadilan", "Hubungan"], map: ["T", "F"] },
-  { q: "Kamu lebih suka menyelesaikan satu tugas sebelum mulai yang lain atau multitasking?", options: ["Satu tugas", "Multitasking"], map: ["J", "P"] },
-  { q: "Saat bersama orang lain, kamu lebih suka suasana ramai atau tenang?", options: ["Ramai", "Tenang"], map: ["E", "I"] },
-  { q: "Kamu percaya pada hal-hal yang bisa dibuktikan atau hal yang dirasakan?", options: ["Dibuktikan", "Dirasakan"], map: ["S", "N"] },
-  { q: "Kamu membuat keputusan berdasarkan analisa atau empati?", options: ["Analisa", "Empati"], map: ["T", "F"] },
-  { q: "Apakah kamu cenderung lebih disiplin atau fleksibel dalam menjalani rutinitas?", options: ["Disiplin", "Fleksibel"], map: ["J", "P"] },
-  { q: "Kamu merasa lebih nyaman dalam kelompok besar atau kelompok kecil?", options: ["Besar", "Kecil"], map: ["E", "I"] },
-  { q: "Kamu lebih memperhatikan kenyataan atau kemungkinan?", options: ["Kenyataan", "Kemungkinan"], map: ["S", "N"] },
-  { q: "Saat memberi saran, kamu lebih jujur atau menyesuaikan?", options: ["Jujur", "Menyesuaikan"], map: ["T", "F"] },
-  { q: "Kamu menyukai hal yang pasti atau kejutan?", options: ["Pasti", "Kejutan"], map: ["J", "P"] },
-  { q: "Apakah kamu merasa canggung dalam situasi sosial atau nyaman?", options: ["Canggung", "Nyaman"], map: ["I", "E"] },
-  { q: "Kamu lebih mempercayai naluri atau fakta nyata?", options: ["Naluri", "Fakta"], map: ["N", "S"] },
-  { q: "Dalam menyelesaikan konflik, kamu menggunakan logika atau perasaan?", options: ["Logika", "Perasaan"], map: ["T", "F"] },
-  { q: "Apakah kamu lebih suka kebebasan atau aturan?", options: ["Kebebasan", "Aturan"], map: ["P", "J"] },
-  { q: "Kamu lebih senang berbagi pikiran atau menyimpannya sendiri?", options: ["Berbagi", "Menyimpan"], map: ["E", "I"] },
-  { q: "Kamu merasa lebih tertantang oleh hal baru atau hal yang sudah dikenal?", options: ["Hal baru", "Dikenal"], map: ["N", "S"] },
-  { q: "Dalam menilai orang lain, kamu lebih objektif atau mempertimbangkan perasaan mereka?", options: ["Objektif", "Perasaan"], map: ["T", "F"] },
-  { q: "Kamu lebih memilih rencana panjang atau fleksibilitas harian?", options: ["Rencana", "Fleksibel"], map: ["J", "P"] }
-);
+    <div style="margin-top: 20px;">
+      <button type="button" class="btn" onclick="prevPage()">Sebelumnya</button>
+      <button type="button" class="btn" onclick="nextPage()">Berikutnya</button>
+      <button type="button" class="btn" id="submitBtn" style="display:none" onclick="submitForm()">Kirim Jawaban</button>
+    </div>
+  </form>
 
-];
+  <div id="result" style="margin-top:30px;"></div>
 
-    const mbtiDescriptions = {
-      ISTJ: {
-    desc: "ISTJ adalah individu yang bertanggung jawab, logis, dan sangat terorganisir. Mereka sangat menghargai aturan dan stabilitas.",
-    jobs: "Supervisor Dapur, Quality Control, Manajer Inventaris"
-  },
-  ISFJ: {
-    desc: "ISFJ dikenal sebagai penjaga yang setia dan penuh perhatian. Mereka sangat peduli terhadap kesejahteraan orang lain.",
-    jobs: "Admin Gudang, Staff HR, Asisten Manajer Operasional"
-  },
-  INFJ: {
-    desc: "INFJ adalah visioner yang intuitif dan penuh empati. Mereka suka membantu orang berkembang secara pribadi.",
-    jobs: "Trainer Staff, Konselor Karyawan, R&D Produk"
-  },
-  INTJ: {
-    desc: "INTJ adalah perencana strategis yang mandiri dan berpikiran logis. Mereka hebat dalam menyusun sistem jangka panjang.",
-    jobs: "Analis Operasional, Data Analyst Restoran, Manager Strategi"
-  },
-  ISTP: {
-    desc: "ISTP adalah pemecah masalah yang tenang dan praktis. Mereka cepat memahami sistem teknis dan suka efisiensi.",
-    jobs: "Teknisi Mesin Dapur, Maintenance, Analis Proses"
-  },
-  ISFP: {
-    desc: "ISFP cenderung pendiam, artistik, dan peduli terhadap keharmonisan lingkungan kerja.",
-    jobs: "Dekorator Interior Restoran, Chef Artistik, Waiter Estetik"
-  },
-  INFP: {
-    desc: "INFP adalah idealis yang kreatif dan sensitif. Mereka mendorong harmoni dan makna dalam pekerjaan.",
-    jobs: "Content Creator Restoran, Penulis Menu, HRD yang humanis"
-  },
-  INTP: {
-    desc: "INTP adalah pemikir logis dan independen. Mereka suka menganalisis sistem dan menemukan solusi baru.",
-    jobs: "Data Analyst, IT Support Restoran, Sistem Optimizer"
-  },
-  ESTP: {
-    desc: "ESTP adalah ekstrovert yang berani dan suka tantangan. Mereka pandai mengatasi masalah mendadak.",
-    jobs: "Floor Manager, Event Coordinator, Chef Eksekutif"
-  },
-  ESFP: {
-    desc: "ESFP adalah entertainer sejati yang energik dan suka membuat suasana hidup. Mereka ahli membangun suasana menyenangkan.",
-    jobs: "Pelayan Utama, Host, Kasir Frontliner"
-  },
-  ENFP: {
-    desc: "ENFP adalah inovator yang antusias dan inspiratif. Mereka suka mengeksplorasi ide baru dan memotivasi tim.",
-    jobs: "Marketing Kreatif, Promotor Restoran, Kepala Komunikasi"
-  },
-  ENTP: {
-    desc: "ENTP adalah visioner yang cerdas dan suka berdebat. Mereka tertarik menciptakan solusi unik dan sistem baru.",
-    jobs: "Konsultan Operasional, Developer Aplikasi Pemesanan, Manajer Inovasi"
-  },
-  ESTJ: {
-    desc: "ESTJ adalah pemimpin alami yang tegas dan terorganisir. Mereka unggul dalam mengatur orang dan proses.",
-    jobs: "Manajer Restoran, Kepala Shift, Supervisor Produksi"
-  },
-  ESFJ: {
-    desc: "ESFJ adalah sosok yang hangat dan terstruktur. Mereka suka membantu orang lain dan menjaga harmoni tim.",
-    jobs: "Manajer Pelayanan, HRD Restoran, Trainer Frontliner"
-  },
-  ENFJ: {
-    desc: "ENFJ adalah pemimpin yang penuh semangat, empatik, dan peduli pada pertumbuhan orang lain.",
-    jobs: "Direktur Operasional, HRD Manager, Customer Service Supervisor"
-  },
-  ENTJ: {
-    desc: "ENTJ adalah pemimpin strategis yang percaya diri dan visioner. Mereka ahli menyusun arah dan mengatur sumber daya.",
-    jobs: "CEO Restoran, Direktur Franchise, Project Leader"
-  },
-      // Tambahkan deskripsi lain jika diperlukan
-    };
+<script>
+  const questions = [
+    // 15 soal EI
+    ["Saya merasa berenergi saat bersama banyak orang", "EI", "E", "I"],
+    ["Saya lebih suka merenung sendiri daripada ngobrol", "EI", "I", "E"],
+    ["Saya berbicara sebelum berpikir", "EI", "E", "I"],
+    ["Saya cenderung lebih diam di tempat baru", "EI", "I", "E"],
+    ["Saya menikmati percakapan grup besar", "EI", "E", "I"],
+    ["Saya cepat lelah saat terlalu banyak interaksi sosial", "EI", "I", "E"],
+    ["Saya suka mengambil peran aktif dalam tim", "EI", "E", "I"],
+    ["Saya lebih suka komunikasi lewat tulisan", "EI", "I", "E"],
+    ["Saya cepat beradaptasi di lingkungan ramai", "EI", "E", "I"],
+    ["Saya lebih suka berteman dengan sedikit orang dekat", "EI", "I", "E"],
+    ["Saya suka bersosialisasi di acara publik", "EI", "E", "I"],
+    ["Saya sering menghindari panggilan telepon", "EI", "I", "E"],
+    ["Saya cenderung jadi pusat perhatian", "EI", "E", "I"],
+    ["Saya lebih suka mendengar daripada berbicara", "EI", "I", "E"],
+    ["Saya nyaman berbicara spontan", "EI", "E", "I"],
 
-    function nextPage() {
-    document.getElementById("page1").classList.add("d-none");
-    document.getElementById("page2").classList.remove("d-none");
+    // 15 soal SN
+    ["Saya mempercayai data dan fakta", "SN", "S", "N"],
+    ["Saya membayangkan kemungkinan dari sesuatu", "SN", "N", "S"],
+    ["Saya fokus pada apa yang terjadi saat ini", "SN", "S", "N"],
+    ["Saya suka berpikir di luar kebiasaan", "SN", "N", "S"],
+    ["Saya mendetail dalam pekerjaan", "SN", "S", "N"],
+    ["Saya melihat pola dari banyak kejadian", "SN", "N", "S"],
+    ["Saya menyukai hal-hal konkret", "SN", "S", "N"],
+    ["Saya mengikuti intuisi saya", "SN", "N", "S"],
+    ["Saya suka dengan instruksi jelas", "SN", "S", "N"],
+    ["Saya melihat makna tersembunyi dari kata orang", "SN", "N", "S"],
+    ["Saya lebih percaya pengalaman daripada teori", "SN", "S", "N"],
+    ["Saya lebih suka ide kreatif daripada fakta", "SN", "N", "S"],
+    ["Saya mengingat detail kecil", "SN", "S", "N"],
+    ["Saya berpikir tentang masa depan", "SN", "N", "S"],
+    ["Saya menikmati tugas praktis", "SN", "S", "N"],
 
-    const container = document.getElementById("questions");
-    container.innerHTML = ""; // mencegah penggandaan
+    // 15 soal TF
+    ["Saya membuat keputusan berdasarkan logika", "TF", "T", "F"],
+    ["Saya mempertimbangkan perasaan orang lain saat mengambil keputusan", "TF", "F", "T"],
+    ["Saya mengatakan kebenaran meski menyakitkan", "TF", "T", "F"],
+    ["Saya ingin menjaga perasaan orang", "TF", "F", "T"],
+    ["Saya kritis dalam menilai", "TF", "T", "F"],
+    ["Saya merasa terganggu jika orang lain terluka", "TF", "F", "T"],
+    ["Saya lebih menghargai keadilan daripada kasih sayang", "TF", "T", "F"],
+    ["Saya mudah tersentuh dengan cerita sedih", "TF", "F", "T"],
+    ["Saya mengedepankan efisiensi dalam bekerja", "TF", "T", "F"],
+    ["Saya sering merasa empati pada orang lain", "TF", "F", "T"],
+    ["Saya menilai sesuatu secara objektif", "TF", "T", "F"],
+    ["Saya mendengarkan perasaan orang terlebih dahulu", "TF", "F", "T"],
+    ["Saya lebih rasional daripada emosional", "TF", "T", "F"],
+    ["Saya lebih merasa daripada berpikir", "TF", "F", "T"],
+    ["Saya menyukai debat logis", "TF", "T", "F"],
 
-    questionsData.forEach((q, i) => {
-      const optionA = q.options[0];
-      const optionB = q.options[1];
-      const mapA = q.map[0];
-      const mapB = q.map[1];
+    // 15 soal JP
+    ["Saya suka membuat perencanaan sebelumnya", "JP", "J", "P"],
+    ["Saya fleksibel dan spontan", "JP", "P", "J"],
+    ["Saya tidak nyaman dengan ketidakpastian", "JP", "J", "P"],
+    ["Saya suka mengeksplorasi tanpa rencana", "JP", "P", "J"],
+    ["Saya suka daftar tugas", "JP", "J", "P"],
+    ["Saya menyelesaikan pekerjaan di menit terakhir", "JP", "P", "J"],
+    ["Saya menyukai keputusan final", "JP", "J", "P"],
+    ["Saya suka banyak pilihan terbuka", "JP", "P", "J"],
+    ["Saya rapi dan terorganisir", "JP", "J", "P"],
+    ["Saya sering menunda pekerjaan", "JP", "P", "J"],
+    ["Saya suka ketertiban", "JP", "J", "P"],
+    ["Saya bekerja dengan suasana hati", "JP", "P", "J"],
+    ["Saya suka jadwal tetap", "JP", "J", "P"],
+    ["Saya mudah terganggu", "JP", "P", "J"],
+    ["Saya ingin semuanya dikendalikan", "JP", "J", "P"]
+  ];
 
+  const perPage = 10;
+  let currentPage = 0;
+
+  const container = document.getElementById("questionContainer");
+
+  function showPage(page) {
+    container.innerHTML = "";
+    const start = page * perPage;
+    const end = Math.min(start + perPage, questions.length);
+    document.getElementById("progressBar").style.width = `${((page + 1) / Math.ceil(questions.length / perPage)) * 100}%`;
+
+    for (let i = start; i < end; i++) {
+      const [q, dim, a, b] = questions[i];
       container.innerHTML += `
-        <div class="mb-3">
-          <p><strong>${i + 1}. ${q.q}</strong></p>
-          <div class="form-check">
-            <input type="radio" class="form-check-input" id="q${i}a" name="q${i}" value="${mapA}" required>
-            <label class="form-check-label" for="q${i}a">${optionA}</label>
-          </div>
-          <div class="form-check">
-            <input type="radio" class="form-check-input" id="q${i}b" name="q${i}" value="${mapB}">
-            <label class="form-check-label" for="q${i}b">${optionB}</label>
-          </div>
+        <div class="question">
+          <p>${i + 1}. ${q}</p>
+          <label><input type="radio" name="q${i}" value="A" required> ${a}</label><br>
+          <label><input type="radio" name="q${i}" value="B"> ${b}</label>
         </div>`;
-    });
+    }
+
+    document.querySelector("button[onclick='prevPage()']").style.display = page > 0 ? "inline" : "none";
+    document.querySelector("button[onclick='nextPage()']").style.display = page < Math.floor(questions.length / perPage) ? "inline" : "none";
+    document.getElementById("submitBtn").style.display = page === Math.floor(questions.length / perPage) ? "inline" : "none";
   }
 
-  document.getElementById("quizForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+  function prevPage() {
+    if (currentPage > 0) showPage(--currentPage);
+  }
 
-    document.getElementById("loading").classList.remove("d-none");
+  function nextPage() {
+    if (currentPage < questions.length / perPage) showPage(++currentPage);
+  }
 
-    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
-    const totalQuestions = questionsData.length;
+  function submitForm() {
+    const scores = { EI: 0, SN: 0, TF: 0, JP: 0 };
+    const total = { EI: 0, SN: 0, TF: 0, JP: 0 };
 
-    for (let i = 0; i < totalQuestions; i++) {
+    for (let i = 0; i < questions.length; i++) {
+      const dim = questions[i][1];
       const selected = document.querySelector(`input[name="q${i}"]:checked`);
       if (selected) {
-        const val = selected.value;
-        if (scores.hasOwnProperty(val)) {
-          scores[val]++;
-        }
+        total[dim]++;
+        if (selected.value === "B") scores[dim]++;
       }
     }
 
-    const result =
-      (scores.E >= scores.I ? "E" : "I") +
-      (scores.S >= scores.N ? "S" : "N") +
-      (scores.T >= scores.F ? "T" : "F") +
-      (scores.J >= scores.P ? "J" : "P");
+    const mbti =
+      (scores.EI > total.EI / 2 ? "I" : "E") +
+      (scores.SN > total.SN / 2 ? "N" : "S") +
+      (scores.TF > total.TF / 2 ? "F" : "T") +
+      (scores.JP > total.JP / 2 ? "P" : "J");
 
-    const name = document.getElementById("username").value;
-    const desc = mbtiDescriptions[result]?.desc || "Deskripsi belum tersedia";
-    const jobs = mbtiDescriptions[result]?.jobs || "Rekomendasi belum tersedia";
+    const posisi = {
+      ISTJ: "Supervisor Dapur", ISFJ: "Quality Control", INFJ: "Manajer HR", INTJ: "Manajer Operasional",
+      ISTP: "Teknisi Mesin", ISFP: "Barista/Koki Artistik", INFP: "Perancang Menu", INTP: "Analis Operasi",
+      ESTP: "Pelayan", ESFP: "Public Relations", ENFP: "Event Organizer", ENTP: "Marketing Strategist",
+      ESTJ: "Kepala Shift", ESFJ: "Koordinator Layanan Pelanggan", ENFJ: "Pelatih Tim", ENTJ: "General Manager"
+    };
 
-    document.getElementById("hiddenName").value = name;
-    document.getElementById("hiddenMBTI").value = result;
-    document.getElementById("hiddenDesc").value = desc;
-    document.getElementById("hiddenJobs").value = jobs;
+    document.getElementById("hasilMbti").value = mbti;
+    document.getElementById("posisiCocok").value = posisi[mbti];
 
-    // Kirim form secara manual setelah semua nilai diset
-    e.target.submit();
-  });
+    document.getElementById("result").innerHTML = `<h3>Hasil MBTI Anda: ${mbti}</h3><p>Posisi cocok: <strong>${posisi[mbti]}</strong></p>`;
+
+    document.getElementById("mbtiForm").submit();
+  }
+
+  showPage(0);
 </script>
 </body>
 </html>
