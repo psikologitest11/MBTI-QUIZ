@@ -118,8 +118,9 @@
       container.innerHTML += `
         <div class="question">
           <p>${i + 1}. ${q}</p>
-          <label><input type="radio" name="q${i}" value="A" required> ${a}</label><br>
-          <label><input type="radio" name="q${i}" value="B"> ${b}</label>
+          <label><input type="radio" name="q${i}" value="${a}" required> Setuju</label><br>
+          <label><input type="radio" name="q${i}" value="${b}"> Tidak Setuju</label>
+
         </div>`;
     }
 
