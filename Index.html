@@ -37,7 +37,9 @@
     <div id="page2" class="hidden">
       <div class="card p-4 shadow-lg">
         <h4 class="mb-4">Tes MBTI</h4>
-        <form id="https://formspree.io/f/xpwrylpz">
+        <form id="quizForm" action="https://formspree.io/f/xpwrylplz" method="POST">
+          <input type="hidden" name="nama" id="hiddenName">
+          <input type="hidden" name="hasil_mbti" id="hiddenMBTI">
           <div id="quizContainer"></div>
           <button type="submit" class="btn btn-success mt-3">Selesai & Lihat Hasil</button>
         </form>
@@ -78,8 +80,6 @@
       {q:"Anda merasa nyaman saat:",type:"JP",options:["Semua rapi","Tugas terselesaikan","Santai tanpa tekanan","Ikut arus","Banyak pilihan terbuka"],map:["J","J","P","P","P"]}
     ];
 
-    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
-
     function startQuiz(event) {
       event.preventDefault();
       document.getElementById("page1").classList.add("hidden");
@@ -89,6 +89,7 @@
 
     function renderQuestions() {
       const container = document.getElementById("quizContainer");
+      container.innerHTML = ''; // Clear if rerender
       questions.forEach((q, index) => {
         const qBlock = document.createElement("div");
         qBlock.className = "mb-3";
@@ -107,19 +108,37 @@
 
     document.getElementById("quizForm").addEventListener("submit", function (e) {
       e.preventDefault();
+
+      // Reset skor
+      const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
       const formData = new FormData(this);
-      formData.forEach((val) => {
-        scores[val]++;
-      });
+      for (const pair of formData.entries()) {
+        const val = pair[1];
+        if (scores.hasOwnProperty(val)) {
+          scores[val]++;
+        }
+      }
+
       const result =
         (scores.E >= scores.I ? "E" : "I") +
         (scores.S >= scores.N ? "S" : "N") +
         (scores.T >= scores.F ? "T" : "F") +
         (scores.J >= scores.P ? "J" : "P");
 
+      const name = document.getElementById("username").value;
+
+      // Set ke hidden input
+      document.getElementById("hiddenName").value = name;
+      document.getElementById("hiddenMBTI").value = result;
+
+      // Tampilkan hasil
       document.getElementById("page2").classList.add("hidden");
       document.getElementById("page3").classList.remove("hidden");
-      document.getElementById("resultText").textContent = `Hai, ${document.getElementById("username").value}! Tipe kepribadianmu adalah: ${result}`;
+      document.getElementById("resultText").textContent = `Hai, ${name}! Tipe kepribadianmu adalah: ${result}`;
+
+      // Submit ke Formspree
+      this.submit();
     });
   </script>
 </body>
